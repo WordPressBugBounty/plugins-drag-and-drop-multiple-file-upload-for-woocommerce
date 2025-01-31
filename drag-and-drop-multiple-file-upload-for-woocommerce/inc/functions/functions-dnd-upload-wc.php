@@ -125,7 +125,7 @@
 		if( get_option('wcf_drag_n_drop_disable') == 'yes' && get_post_meta( $product_id, 'enable_dnd_file_upload_wc', true ) == '' ) {
 			return;
 		}
-        
+
 		// Disable upload for individual product.
 		if(  get_option('wcf_drag_n_drop_disable') !== 'yes' && get_post_meta( $product_id, 'disable_dnd_file_upload_wc', true ) === 'yes' ) {
 			return;
@@ -221,8 +221,8 @@
 
 	function dndmfu_wc_add_cart_data( $cart_item_data, $product_id, $variation_id ) {
 
-		$dir = trailingslashit( dndmfu_wc_dir() );
-		$name = dndmfu_wc_get_filename();
+		$dir        = trailingslashit( dndmfu_wc_dir() );
+		$name       = dndmfu_wc_get_filename();
 		$post_files = ( isset( $_POST[ $name ] ) ? array_map('sanitize_text_field', $_POST[ $name ] ) : null );
 		$files = array();
 
@@ -232,7 +232,8 @@
 			foreach( $post_files as $file ) {
 				$tmp_file = $dir . wc_clean( wp_unslash( $file ) );
 				if( file_exists( $tmp_file ) ) {
-                    $new_name = wp_unique_filename( $dir, wp_basename( $file ) );
+                    $file_name = wp_unique_filename( $dir, wp_basename( $file ) );
+					$new_name  = apply_filters( 'dndmfu_wc_file_name', $file_name );
 					if( rename( $tmp_file, $dir . $new_name ) ) {
 						$files[] = wp_basename( $new_name );
 					}

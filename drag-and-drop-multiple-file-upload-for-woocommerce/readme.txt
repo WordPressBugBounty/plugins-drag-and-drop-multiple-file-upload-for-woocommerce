@@ -1,12 +1,14 @@
 === Drag and Drop Multiple File Upload for WooCommerce ===
 Contributors: glenwpcoder
-Tags: drag and drop, woocommerce, ajax uploader, multiple file, upload, woocommerce uploader
+Tags: drag and drop, woocommerce, ajax uploader, multiple file, upload
 Requires at least: 3.0.1
-Tested up to: 6.6
-Stable tag: 1.1.3
+Tested up to: 6.7
+Stable tag: 1.1.4
 Requires PHP: 5.2.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
+
+Drag and Drop Multiple File Uploader is a simple, straightforward WordPress plugin extension for WooCommerce.
 
 == Description ==
 
@@ -150,6 +152,10 @@ To install this plugin see below:
 8. Upload Display - Front-end
 
 == Changelog ==
+
+= 1.1.4 =
+- Fixed load_plugin_textdomain warning
+- WooCommerce 9.6.0 compatibility check
 
 = 1.1.3 =
 * Check WooCommerce 9.1.4 compatibility

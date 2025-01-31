@@ -63,11 +63,11 @@
 
 		public function init() {
 
+			// Load text domain
+			add_action( 'init', array( $this, 'text_domain' ) );
+
 			// Includes functions / helpers
 			$this->includes();
-
-			// Load plugin text domain
-			$this->text_domain();
 
             // Temporary fix
             $this->prefix_option();
@@ -255,7 +255,7 @@
 		*/
 
         public function prefix_option() {
-            
+
             $settings = array(
                 'drag_n_drop_text','drag_n_drop_separator','drag_n_drop_browse_text','drag_n_drop_default_label','drag_n_drop_error_server_limit','drag_n_drop_error_failed_to_upload','drag_n_drop_error_files_too_large','drag_n_drop_error_invalid_file','drag_n_drop_error_max_file','drag_n_drop_error_min_file','drag_n_drop_required','drag_n_drop_disable','drag_n_drop_field_name','drag_n_drop_file_size_limit','drag_n_drop_max_file_upload','drag_n_drop_min_file_upload','drag_n_drop_support_file_upload','show_in_dnd_file_uploader_in','show_in_dnd_file_upload_after','drag_n_drop_error_max_number_of_files'
             );
@@ -286,7 +286,7 @@
 
             // Get current language
             $lang = dndmfu_wc_lang();
-            
+
 			//  registered script with data for a JavaScript variable.
 			wp_localize_script( 'dndmfu-wc-free', 'dnd_wc_uploader',
 				array(
