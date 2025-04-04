@@ -196,10 +196,14 @@
 
 		public function filters() {
 
+			// Get plugin basename
+			$plugin = plugin_basename( DNDMFU_WC_DIR ) .'/drag-and-drop-file-uploads-wc.php';
+
 			// Array - custom filters
 			$filters = array(
 				'woocommerce_add_to_cart_validation' 	=>	array( 'cb' => 'dndmfu_wc_cart_validation', 10,4 ),
-				'woocommerce_update_cart_validation'	=>	array( 'cb' => 'dndmfu_wc_update_cart_validation', 10,4 )
+				'woocommerce_update_cart_validation'	=>	array( 'cb' => 'dndmfu_wc_update_cart_validation', 10,4 ),
+				'plugin_action_links_'. $plugin         =>  array( 'cb' => [ $this, 'dndmfu_wc_settings'], 10, 1 ),
 			);
 
 			// Loop all filters
@@ -248,6 +252,18 @@
 
 		public function text_domain() {
 			load_plugin_textdomain( 'dnd-file-upload-wc', false, dirname( dirname( plugin_basename( __FILE__ ) ) ) . '/languages' );
+		}
+
+		/**
+		* Add plugin settings
+		*/
+		public function dndmfu_wc_settings( $actions ) {
+			$upload_links = array(
+				'<a href="' . admin_url( 'admin.php?page=wc-settings&tab=dnd-wc-file-uploads' ) . '">Settings</a>',
+				'<a href="https://www.codedropz.com/woocommerce-drag-drop-multiple-file-upload/" target="_blank" style="color: green; font-weight: 700;">Get Pro</a>',
+			);
+            $actions = array_merge( $upload_links, $actions );
+            return $actions;
 		}
 
         /**

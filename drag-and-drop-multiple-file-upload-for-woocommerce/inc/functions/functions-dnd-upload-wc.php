@@ -224,18 +224,32 @@
 		$dir        = trailingslashit( dndmfu_wc_dir() );
 		$name       = dndmfu_wc_get_filename();
 		$post_files = ( isset( $_POST[ $name ] ) ? array_map('sanitize_text_field', $_POST[ $name ] ) : null );
-		$files = array();
+		$files      = array();
 
 		if( $post_files ) {
 
 			// Loop files
 			foreach( $post_files as $file ) {
-				$tmp_file = $dir . wc_clean( wp_unslash( $file ) );
-				if( file_exists( $tmp_file ) ) {
-                    $file_name = wp_unique_filename( $dir, wp_basename( $file ) );
+
+				// Clean the file (Remove unwanted characters)
+				$file = wc_clean( wp_unslash( $file ) );
+
+				// Prevent traversal attacks
+				$tmp_file = realpath( $dir . ltrim( $file, '/' ) );
+
+				// Prevents path manipulation attacks.
+				if( $tmp_file !== false && strpos( $tmp_file, realpath( $dir ) ) === 0 ) {
+
+					// Sanitize filename.
+					$raw_name  = sanitize_file_name( wp_basename( $file ) );
+                    $file_name = wp_unique_filename( $dir, $raw_name );
 					$new_name  = apply_filters( 'dndmfu_wc_file_name', $file_name );
-					if( rename( $tmp_file, $dir . $new_name ) ) {
-						$files[] = wp_basename( $new_name );
+
+					// Make sure file is exists
+					if ( file_exists( $tmp_file ) ) {
+						if( rename( $tmp_file, $dir . $new_name ) ) {
+							$files[] = wp_basename( $new_name );
+						}
 					}
 				}
 			}

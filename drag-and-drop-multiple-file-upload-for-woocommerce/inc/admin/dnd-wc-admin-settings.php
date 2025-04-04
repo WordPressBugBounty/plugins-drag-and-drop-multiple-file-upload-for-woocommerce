@@ -20,7 +20,21 @@
 			add_filter( 'woocommerce_settings_tabs_array', array( $this, 'add_settings_page' ), 20 );
 			add_action( 'woocommerce_settings_' . $this->id, array( $this, 'output' ) );
 			add_action( 'woocommerce_settings_save_' . $this->id, array( $this, 'save' ) );
+			add_action( 'woocommerce_after_settings_'. $this->id, array( $this, 'banner' ) );
 
+		}
+
+		/**
+		 * Add custom banner
+		 * @return void
+		 */
+
+		public function banner() {
+			echo '<div>
+					<a href="https://www.codedropz.com/woocommerce-drag-drop-multiple-file-upload/" target="_blank" style="outline:none; box-shadow:none; display: inline-block;">
+						<img style="width:250px;" src="'.plugins_url( 'assets/images/pro-features.png', dirname( dirname(__FILE__) ) ).'">
+					</a>
+				</div>';
 		}
 
 		/**
@@ -45,7 +59,7 @@
 							'type'  => 	'title',
 							'id'	=>	'wcf_dnd_uploader_info'
 						),
-                        
+
 						array(
 							'title'    		=> 	__( 'Drag & Drop Text', 'dnd-file-upload-wc' ),
 							'id'       		=> 	'wcf_drag_n_drop_text'.$lang,

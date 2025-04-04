@@ -3,7 +3,7 @@ Contributors: glenwpcoder
 Tags: drag and drop, woocommerce, ajax uploader, multiple file, upload
 Requires at least: 3.0.1
 Tested up to: 6.7
-Stable tag: 1.1.4
+Stable tag: 1.1.5
 Requires PHP: 5.2.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -36,36 +36,45 @@ Here's a little [DEMO](https://woo-commerce.codedropz.com/product/cap/).
 * Compatible with any browser
 
 ### ⭐ Premium Features
-
-* **New** - File Remote Storage *(Google Drive, Dropbox, Amazon S3, FTP)*
-* **New** - Attach Files to Email
-* Image Preview (For Images)
-* Text & Style (Color Options, Uploader Icon)
-* Parallel / Sequential Upload (Reduced Server Load, Faster Upload Times)
-* Change **Filename Pattern** *(Filename, Username, User ID, IP Address, Random etc)*
-* Change **Base Upload Directory**
-* Custom **Upload Folder** like *(Order No, Random, Date, Time, Name, Customer ID )*
-* Add Custom Fees *( Conditional )*
-* Approve / Reject Files
-* Upload **Large Files** by using Chunks *( Break large files into smaller Chunks )*
-* Show uploader based on *(Categories, Products, Tags, Attributes)*
-* Show uploader **"before"** or **"after"** Add To Cart Button, Add To Cart Form, Variations Form, Single Variation.
-* Show uploader on **"Checkout"** and **"Product"** page.
-* ZIP Files (File Compression)
-* Set **Max Total Size** of all files.
-* Ajax Uploader
-* **Unlimited Uploads**
-* Optimized Code & Performance
-* Improved Security
-* Unlimited Sites
-* One Time Payment
-* 1 Month Premium Support
+1. **Upload Large File** - Supports uploading large files.
+2. **Image Preview** - Displays thumbnails for images.
+3. **Text & Style** - Color options, borders, uploader icon, and more.
+4. **Parallel Upload** - Limit simultaneous uploads to optimize server performance.
+5. **Custom Filename** - Define custom filename patterns: *(Filename, Username, User ID, IP Address, Random, etc)*
+6. **Change Upload Directory** - Customize the default WordPress upload directory.
+7. **Upload Folder** - 📂 Choose a custom folder to store files:
+	✅ Order No - Customer Order Number
+	✅ Random - Auto-generated  Numbers
+	✅ Date - Date formmat *(e.g., 04-31-2020)*
+	✅ Time - Timestamp
+	✅ Name - Customer Firstname
+	✅ Customer ID - Customer ID
+8. **Custom Fees** - Basic conditional fees.
+	✅ Charge the user based on the **no. of files** *(e.g., 20 files ≥ 2 → add $20)*.
+	✅ Charge the user based on **PDF pages** *(e.g., 20 pages ≥ 10 → multiply $2)*.
+9. **Remove/Reject Files** - Able to remove or delete files in admin orders.
+10. **Chunked Uploads** - Upload large files in smaller chunks to avoid timeouts.
+11. **Uploader Visibility** - Show based on (Categories, Products, Tags, Attributes).
+12. **Uploader Position** - Show **before** or **after** Add to Cart, Form, or Variations.
+13. **Uploader Display** - Show on either the **"Checkout"** or **"Product"** page.
+14. **ZIP Files** - Compress uploaded files into a ZIP archive
+15. **Max Total Size** - Set the maximum combined size for all uploaded files.
+16. **Seamless Remote Storage Integration** (New)
+	🔥 Supports: **Google Drive**, **Amazon S3**, **Dropbox**, **FTP**.
+17. **Attach Files to Email** (New) - Include uploaded files in order confirmation emails.
+	📝 **Note:** Works only with **standard storage** *(not compatible with remote storage)*.
+18. **Ajax Upload** - Upload files without page reload for a seamless experience.
+19. **Unlimited Uploads** - Users can upload as many files as needed.
+20. **Security** - Ensure security with regular updates, vulnerability scans, and threat protection.
+21. **Optimized Code & Performance** – Improve speed and efficiency.
+22. **One-Time Payment** - Pay once and use forever without recurring fees.
+23. **Unlimited Sites** - Use on any number of websites without restrictions.
+24. **1 Month Premium Support** - Get priority assistance for one month.
+25. **Multilingual Support** - Compatible with **WPML** and **Polylang** for translations.
 
 Pro version [DEMO](https://www.codedropz.com/woo-commerce-pro/shop/).
 
 You can get [PRO Version here!](https://www.codedropz.com/woocommerce-drag-drop-multiple-file-upload/)
-
-Compatible with **"WPML"** and **"Polylang"** multilingual plugin.
 
 ### Other Plugin You May Like
 
@@ -152,6 +161,10 @@ To install this plugin see below:
 8. Upload Display - Front-end
 
 == Changelog ==
+
+= 1.1.5 =
+- Fixed - vulnerability issues reported by Phat RiO - BlueRock via (WordFence).
+- Changes - Tweak readme.txt plugin description and features.
 
 = 1.1.4 =
 - Fixed load_plugin_textdomain warning
