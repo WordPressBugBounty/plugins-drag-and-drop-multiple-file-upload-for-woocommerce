@@ -52,9 +52,18 @@
 		*/
 
 		private function __construct() {
+			$this->init_actions();
 			$this->init();
 			$this->hooks();
 			$this->filters();
+		}
+
+		/**
+		 * Plugin init actions (text domain and default error message)
+		 */
+		public function init_actions() {
+			add_action( 'init', array( $this, 'text_domain' ), 10 );
+			add_action( 'init', array( $this, 'setErrorMessages' ), 20 );
 		}
 
 		/**
@@ -62,9 +71,6 @@
 		*/
 
 		public function init() {
-
-			// Load text domain
-			add_action( 'init', array( $this, 'text_domain' ) );
 
 			// Includes functions / helpers
 			$this->includes();
@@ -109,18 +115,6 @@
 
 			// Upload DIR
 			$this->_options['upload_dir'] = $this->wp_upload_dir['basedir'];
-
-			// Set default error message
-			$this->error_message = array(
-				'server_limit'		=>	__('The uploaded file exceeds the maximum upload size of your server.','dnd-file-upload-wc'),
-				'failed_upload'		=>	__('Uploading a file fails for any reason','dnd-file-upload-wc'),
-				'large_file'		=>	__('Uploaded file is too large','dnd-file-upload-wc'),
-				'invalid_type'		=>	__('Uploaded file is not allowed for file type','dnd-file-upload-wc'),
-				'maxNumFiles'		=>	__('You have reached the maximum number of files ( Only %s files allowed )','dnd-file-upload-wc'),
-				'maxTotalSize'		=>	__('The total file(s) size exceeding the max size limit of %s.','dnd-file-upload-wc'),
-				'maxUploadLimit'	=>	__('Note : Some of the files could not be uploaded ( Only %s files allowed )','dnd-file-upload-wc'),
-				'minFileUpload'		=>	__('Please upload atleast %s file(s).','dnd-file-upload-wc')
-			);
 
 		}
 
@@ -252,6 +246,22 @@
 
 		public function text_domain() {
 			load_plugin_textdomain( 'dnd-file-upload-wc', false, dirname( dirname( plugin_basename( __FILE__ ) ) ) . '/languages' );
+		}
+
+		/**
+		 * Set default error message
+		 */
+		public function setErrorMessages() {
+			$this->error_message = array(
+				'server_limit'		=>	__('The uploaded file exceeds the maximum upload size of your server.','dnd-file-upload-wc'),
+				'failed_upload'		=>	__('Uploading a file fails for any reason','dnd-file-upload-wc'),
+				'large_file'		=>	__('Uploaded file is too large','dnd-file-upload-wc'),
+				'invalid_type'		=>	__('Uploaded file is not allowed for file type','dnd-file-upload-wc'),
+				'maxNumFiles'		=>	__('You have reached the maximum number of files ( Only %s files allowed )','dnd-file-upload-wc'),
+				'maxTotalSize'		=>	__('The total file(s) size exceeding the max size limit of %s.','dnd-file-upload-wc'),
+				'maxUploadLimit'	=>	__('Note : Some of the files could not be uploaded ( Only %s files allowed )','dnd-file-upload-wc'),
+				'minFileUpload'		=>	__('Please upload atleast %s file(s).','dnd-file-upload-wc')
+			);
 		}
 
 		/**

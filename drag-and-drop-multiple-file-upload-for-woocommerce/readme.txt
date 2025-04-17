@@ -2,8 +2,8 @@
 Contributors: glenwpcoder
 Tags: drag and drop, woocommerce, ajax uploader, multiple file, upload
 Requires at least: 3.0.1
-Tested up to: 6.7
-Stable tag: 1.1.5
+Tested up to: 6.8
+Stable tag: 1.1.6
 Requires PHP: 5.2.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -47,8 +47,8 @@ Here's a little [DEMO](https://woo-commerce.codedropz.com/product/cap/).
 	✅ Random - Auto-generated  Numbers
 	✅ Date - Date formmat *(e.g., 04-31-2020)*
 	✅ Time - Timestamp
-	✅ Name - Customer Firstname
-	✅ Customer ID - Customer ID
+	✅ Name - Users customer Firstname
+	✅ Customer ID - Users customer ID
 8. **Custom Fees** - Basic conditional fees.
 	✅ Charge the user based on the **no. of files** *(e.g., 20 files ≥ 2 → add $20)*.
 	✅ Charge the user based on **PDF pages** *(e.g., 20 pages ≥ 10 → multiply $2)*.
@@ -161,6 +161,10 @@ To install this plugin see below:
 8. Upload Display - Front-end
 
 == Changelog ==
+
+= 1.1.6 =
+- Tested on Wordpress 6.8
+- Fixed warning on text domain (_load_textdomain_just_in_time was called incorrectly)
 
 = 1.1.5 =
 - Fixed - vulnerability issues reported by Phat RiO - BlueRock via (WordFence).

@@ -6,7 +6,7 @@
 	* Description: This plugin enable user to upload using "Drag & Drop" or "Browse Multiple" file uploads in your WooCommerce Product details page.
 	* Text Domain: dnd-file-upload-wc
 	* Domain Path: /languages
-	* Version: 1.1.5
+	* Version: 1.1.6
 	* Author: Glen Don L. Mongaya
 	* Author URI: http://codedropz.com
 	* WC requires at least: 3.5.0
@@ -23,7 +23,7 @@
 	define( 'DNDMFU_WC', true );
 
 	/**  Define plugin Version */
-	define( 'DNDMFU_WC_VERSION', '1.1.5' );
+	define( 'DNDMFU_WC_VERSION', '1.1.6' );
 
 	/**  Define constant Plugin Directories  */
 	define( 'DNDMFU_WC_DIR', wp_normalize_path( untrailingslashit( dirname( __FILE__ ) ) ) );
