@@ -138,20 +138,20 @@
 		$name = dndmfu_wc_get_filename();
 
 		// Custom data attributes
-		$attributes['data-name'] 	= $name;
-		$attributes['data-type'] 	= ( is_array( $types ) ? implode( '|', array_map('trim', $types) ) : 'jpg|jpeg|png|gif|pdf|doc|docx|xls|xlsx|stl|mp4|mp3|zip' );
-		$attributes['data-limit'] 	= get_option('wcf_drag_n_drop_file_size_limit') ? get_option('wcf_drag_n_drop_file_size_limit') : 10485760;
-		$attributes['data-max'] 	= get_option('wcf_drag_n_drop_max_file_upload') ? (int)get_option('wcf_drag_n_drop_max_file_upload') : 10;
-		$attributes['data-min'] 	= get_option('wcf_drag_n_drop_min_file_upload') ? (int)get_option('wcf_drag_n_drop_min_file_upload') : 0;
-		$attributes['data-id']   	= $product_id;
-		$attributes['multiple'] 	= 'multiple';
+		$attributes['data-name']  = $name;
+		$attributes['data-type']  = ( is_array( $types ) ? implode( '|', array_map('trim', $types) ) : 'jpg|jpeg|png|gif|pdf|doc|docx|xls|xlsx|stl|mp4|mp3|zip' ); // (update: excluded in html for security reason)
+		$attributes['data-limit'] = get_option('wcf_drag_n_drop_file_size_limit') ? get_option('wcf_drag_n_drop_file_size_limit') : 10485760;
+		$attributes['data-max']   = get_option('wcf_drag_n_drop_max_file_upload') ? (int)get_option('wcf_drag_n_drop_max_file_upload') : 10;
+		$attributes['data-min']   = get_option('wcf_drag_n_drop_min_file_upload') ? (int)get_option('wcf_drag_n_drop_min_file_upload') : 0;
+		$attributes['data-id']    = $product_id;
+		$attributes['multiple']   = 'multiple';
 
         // Allow other plugin to filter file types
         $accept_all = apply_filters('dndmfu_wc_all_types', false );
 
         // Add accept file types attributes
         if( ! $accept_all ) {
-            $types = explode('|', $attributes['data-type'] );
+            $types                = explode('|', $attributes['data-type'] );
             $attributes['accept'] = '.' . implode(', .', array_map( 'trim', $types ) );
         }
 

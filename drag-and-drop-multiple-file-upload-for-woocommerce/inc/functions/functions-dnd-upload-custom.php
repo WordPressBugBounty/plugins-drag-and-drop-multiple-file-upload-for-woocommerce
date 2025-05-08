@@ -51,7 +51,8 @@
 		$file_type_pattern = '';
 
 		$allowed_file_types = array();
-		$file_types = explode( '|', $types );
+		$types              = preg_replace( '/[^a-zA-Z0-9_|\']/', '', $types ); // remove special character
+		$file_types         = explode( '|', $types );
 
 		foreach ( $file_types as $file_type ) {
 			$file_type = trim( $file_type, '.' );

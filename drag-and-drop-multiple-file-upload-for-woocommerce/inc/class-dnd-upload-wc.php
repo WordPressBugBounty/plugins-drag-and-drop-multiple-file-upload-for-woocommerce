@@ -376,14 +376,28 @@
 			}
 
 			/* File type validation */
-			$supported_type = preg_replace( '/[^a-zA-Z0-9_|\']/', '', sanitize_text_field( $_POST['supported_type'] ) );
-			$file_type_pattern = dndmfu_wc_filetypes( $supported_type );
+			$supported_options = ( get_option('wcf_drag_n_drop_support_file_upload') ? explode( ',', get_option('wcf_drag_n_drop_support_file_upload') ) : null );
+			$supported_types    = 'jpg|jpeg|JPG|png|gif|pdf|doc|docx|ppt|pptx|odt|avi|ogg|m4a|mov|mp3|mp4|mpg|wav|wmv|xls';
+
+			// Parse allowed types
+			if( $supported_options && is_array( $supported_options ) ) {
+				$supported_types = implode( '|', array_map('trim', $supported_options) );
+			}
+
+			// Prepare file type pattern.
+			$file_type_pattern = dndmfu_wc_filetypes( $supported_types );
 
 			// Get file extension
 			$extension = strtolower( pathinfo( $file['name'], PATHINFO_EXTENSION ) );
 
 			// validate file type
-			if ( ! preg_match( $file_type_pattern, $file['name'] ) || ! dndmfu_wc_validate_type( $extension, $supported_type ) ) {
+			if ( ! preg_match( $file_type_pattern, $file['name'] ) || ! dndmfu_wc_validate_type( $extension, $supported_types ) ) {
+				wp_send_json_error( get_option('wcf_drag_n_drop_error_invalid_file') ? get_option('wcf_drag_n_drop_error_invalid_file') : $this->get_error_msg('invalid_type') );
+			}
+
+			// Check file type (Validation)
+			$validate = wp_check_filetype( $file['name'] );
+			if ( $validate['type'] == false || $validate['ext'] == false ) {
 				wp_send_json_error( get_option('wcf_drag_n_drop_error_invalid_file') ? get_option('wcf_drag_n_drop_error_invalid_file') : $this->get_error_msg('invalid_type') );
 			}
 

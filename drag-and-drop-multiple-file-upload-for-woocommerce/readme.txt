@@ -3,7 +3,7 @@ Contributors: glenwpcoder
 Tags: drag and drop, woocommerce, ajax uploader, multiple file, upload
 Requires at least: 3.0.1
 Tested up to: 6.8
-Stable tag: 1.1.6
+Stable tag: 1.1.7
 Requires PHP: 5.2.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -58,7 +58,6 @@ Here's a little [DEMO](https://woo-commerce.codedropz.com/product/cap/).
 12. **Uploader Position** - Show **before** or **after** Add to Cart, Form, or Variations.
 13. **Uploader Display** - Show on either the **"Checkout"** or **"Product"** page.
 14. **ZIP Files** - Compress uploaded files into a ZIP archive
-15. **Max Total Size** - Set the maximum combined size for all uploaded files.
 16. **Seamless Remote Storage Integration** (New)
 	🔥 Supports: **Google Drive**, **Amazon S3**, **Dropbox**, **FTP**.
 17. **Attach Files to Email** (New) - Include uploaded files in order confirmation emails.
@@ -67,7 +66,6 @@ Here's a little [DEMO](https://woo-commerce.codedropz.com/product/cap/).
 19. **Unlimited Uploads** - Users can upload as many files as needed.
 20. **Security** - Ensure security with regular updates, vulnerability scans, and threat protection.
 21. **Optimized Code & Performance** – Improve speed and efficiency.
-22. **One-Time Payment** - Pay once and use forever without recurring fees.
 23. **Unlimited Sites** - Use on any number of websites without restrictions.
 24. **1 Month Premium Support** - Get priority assistance for one month.
 25. **Multilingual Support** - Compatible with **WPML** and **Polylang** for translations.
@@ -162,6 +160,9 @@ To install this plugin see below:
 
 == Changelog ==
 
+= 1.1.7 =
+- Securty - Fixed security issue reported by WordFence via RIN MIYACHI (Unauthenticated Arbitrary File Upload via upload Function)
+
 = 1.1.6 =
 - Tested on Wordpress 6.8
 - Fixed warning on text domain (_load_textdomain_just_in_time was called incorrectly)
@@ -239,5 +240,4 @@ To install this plugin see below:
 == Upgrade Notice ==
 
 == Donations ==
-
 Would you like to support the advancement of this plugin? [Donate](http://codedropz.com/donation)
