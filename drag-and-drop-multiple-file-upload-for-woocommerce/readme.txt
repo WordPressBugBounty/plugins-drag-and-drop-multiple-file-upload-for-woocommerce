@@ -2,8 +2,8 @@
 Contributors: glenwpcoder
 Tags: drag and drop, woocommerce, ajax uploader, multiple file, upload
 Requires at least: 3.0.1
-Tested up to: 6.8
-Stable tag: 1.1.7
+Tested up to: 7.0
+Stable tag: 1.1.8
 Requires PHP: 5.2.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -36,6 +36,9 @@ Here's a little [DEMO](https://woo-commerce.codedropz.com/product/cap/).
 * Compatible with any browser
 
 ### ⭐ Premium Features
+
+🚀 [Upgrade to Pro](https://www.codedropz.com/woocommerce-drag-drop-multiple-file-upload/) for larger file uploads, image previews, custom folders, uploader visibility controls, zip downloads, cloud storage, and advanced features designed to enhance your upload experience.
+
 1. **Upload Large File** - Supports uploading large files.
 2. **Image Preview** - Displays thumbnails for images.
 3. **Text & Style** - Color options, borders, uploader icon, and more.
@@ -66,7 +69,6 @@ Here's a little [DEMO](https://woo-commerce.codedropz.com/product/cap/).
 19. **Unlimited Uploads** - Users can upload as many files as needed.
 20. **Security** - Ensure security with regular updates, vulnerability scans, and threat protection.
 21. **Optimized Code & Performance** – Improve speed and efficiency.
-23. **Unlimited Sites** - Use on any number of websites without restrictions.
 24. **1 Month Premium Support** - Get priority assistance for one month.
 25. **Multilingual Support** - Compatible with **WPML** and **Polylang** for translations.
 
@@ -74,12 +76,23 @@ Pro version [DEMO](https://www.codedropz.com/woo-commerce-pro/shop/).
 
 You can get [PRO Version here!](https://www.codedropz.com/woocommerce-drag-drop-multiple-file-upload/)
 
+**PRO VERSION - PLUGIN OVERVIEW**
+
+[youtube https://youtu.be/HoI6roau2Cc?si=q22L2uJhCUWnHBDF]
+
 ### Other Plugin You May Like
 
-* [Drag & Drop Multiple File Upload - WPForms](https://www.codedropz.com/drag-drop-file-uploader-wpforms/)
-An extension for **WPForms**
+* [Order Files for WooCommerce](https://www.codedropz.com/woo-order-files/)
+An extension that attach files to existing WooCommerce orders, allowing both customers and admins to upload and manage files easily.
+
+* [Easy File Upload & Approval](https://wordpress.org/plugins/easy-file-upload-approval/)
+A simple file management plugin that lets users effortlessly upload and submit files for review through a clean and simple drag-and-drop interface.
+
 * [Drag & Drop Multiple File Upload - Contact Form 7](https://wordpress.org/plugins/drag-and-drop-multiple-file-upload-contact-form-7/)
-An extension for **Contact Form 7**
+Drag & Drop File Upload extension for **Contact Form 7**
+
+* [Drag & Drop Multiple File Upload - WPForms](https://www.codedropz.com/drag-drop-file-uploader-wpforms/)
+Drag & Drop File Upload extension for **WPForms**
 
 == Frequently Asked Questions ==
 
@@ -159,9 +172,13 @@ To install this plugin see below:
 8. Upload Display - Front-end
 
 == Changelog ==
+= 1.1.8 =
+- Security - Fixed a security issue where unauthorized users could delete other customers uploaded files. (thanks to: Real_King_Engine (ISAL FRAMEWORK))
+- Added - File were now stored in per token upload folder.
+- Improve - Nonce generation is now protected or logs as per IP address.
 
 = 1.1.7 =
-- Securty - Fixed security issue reported by WordFence via RIN MIYACHI (Unauthenticated Arbitrary File Upload via upload Function)
+- Security - Fixed security issue reported by WordFence via RIN MIYACHI (Unauthenticated Arbitrary File Upload via upload Function)
 
 = 1.1.6 =
 - Tested on Wordpress 6.8
@@ -238,6 +255,3 @@ To install this plugin see below:
 * Initial Release
 
 == Upgrade Notice ==
-
-== Donations ==
-Would you like to support the advancement of this plugin? [Donate](http://codedropz.com/donation)

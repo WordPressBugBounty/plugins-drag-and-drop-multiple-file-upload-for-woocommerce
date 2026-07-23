@@ -1,8 +1,8 @@
 /**
- * CodeDropz Uploader v1.1.7
+ * CodeDropz Uploader v1.1.8
  * Copyright 2019 Glen Mongaya
  * CodeDropz - Drag & Drop Uploader
- * @version 1.1.7
+ * @version 1.1.8
  * @author CodeDropz, Glen Don L. Mongaya
  * @license The MIT License (MIT)
  */
@@ -15,16 +15,22 @@
 		var DataQueue = [];
 
         // Check for nonce
-        const form = document.querySelector('form.cart');
-        if( form ) {
-            const data = new FormData();
-            data.append('action', 'wc_upload_nonce');
-            data.append('nonce', dnd_wc_uploader.nonce);
-            fetch(dnd_wc_uploader.ajax_url, { method: 'POST', body: data })
-            .then(res => res.json())
-            .then(({ data, success }) => success && (dnd_wc_uploader.nonce = data))
-            .catch(console.error)
-        }
+        if ( ! window.dnd_wc_auth ) {
+			window.dnd_wc_auth = (function(){
+				var data = new FormData();
+				data.append('action', 'wc_upload_nonce');
+				return fetch( dnd_wc_uploader.ajax_url, { method: 'POST', body: data })
+					.then(function(res){ return res.json(); })
+					.then(function(res){
+						if ( res && res.success && res.data ) {
+							dnd_wc_uploader.nonce = res.data.nonce;
+							dnd_wc_uploader.token = res.data.token;
+						}
+						return res;
+					})
+					.catch(function(err){ console.error(err); });
+			})();
+		}
 
 		// Support multiple elements
 		this.each(function(){
@@ -213,6 +219,7 @@
 									data = {
 										action 	 : 'dnd_codedropz_upload_delete_wc',
 										security : dnd_wc_uploader.nonce,
+										token	 : dnd_wc_uploader.token || '',
 										path 	 : $('input[data-index="'+ file.progressbar +'"]').val()
 									}
 
@@ -246,7 +253,9 @@
 						if( file.chunkTransfer )
 							file.chunkTransfer.abort();
 					} else {
-						file.transfer.abort();
+						if( file.transfer ) {
+							file.transfer.abort();
+						}
 					}
 				},
 
@@ -608,6 +617,14 @@
 				uploadFile : function( data, file, name ) {
 					var _this = this;
 
+					// Wait for nonce + token before sending anything.
+					if( window.dnd_wc_auth && ! dnd_wc_uploader.token ) {
+						window.dnd_wc_auth.then(function(){
+							_this.uploadFile( data, file, name );
+						});
+						return;
+					}
+
 					// gathering the form data
 					var formData = new FormData();
 					var chunkSize = ( 1024 * FileOptions.chunkSize ); // convert ( 1024 Bytes = 1KB ) ( 1MB = 1000KB )
@@ -617,8 +634,9 @@
 					formData.append('size_limit', options.max_upload_size );
 					formData.append('action', 'dnd_codedropz_upload_wc' );
 
-                    // Security nonce
+                  	// Security nonce ( CSRF ) + ownership token ( authorization )
                     formData.append('security', dnd_wc_uploader.nonce );
+                    formData.append('token', dnd_wc_uploader.token || '' );
 
 					// Chunks file upload - for PRO only
 					if( FileOptions.chunking && file.size > chunkSize && options.is_pro == true ) {

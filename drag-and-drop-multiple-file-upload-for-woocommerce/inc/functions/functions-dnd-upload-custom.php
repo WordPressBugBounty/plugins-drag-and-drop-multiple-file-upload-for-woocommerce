@@ -202,8 +202,11 @@
 		// Setup dirctory path
 		$path = dndmfu_wc_dir( false );
 
+		// The very first call (no $dir_path) is always the top-level /tmp_uploads folder itself.
+		$is_root_tmp_dir = ! $dir_path;
+
 		// Get directory
-		$dir = ( ! $dir_path  ? trailingslashit( $path->wp_upload_dir['basedir'] .'/'. $path->_options['tmp_folder'] ) : trailingslashit( $dir_path ) );
+		$dir = ( $is_root_tmp_dir  ? trailingslashit( $path->wp_upload_dir['basedir'] .'/'. $path->_options['tmp_folder'] ) : trailingslashit( $dir_path ) );
 
 		// Make sure dir is readable or writable
 		if ( ! is_dir( $dir ) || ! is_readable( $dir ) || ! wp_is_writable( $dir ) ) {
@@ -255,8 +258,9 @@
 			@closedir( $handle );
 		}
 
-		// Remove empty dir except - /tmp_uploads
-		if( false === strpos( $dir, $path->_options['tmp_folder'] ) ) {
+		// Remove empty dir - but never the top-level /tmp_uploads folder itself.
+		// (rmdir() silently no-ops if the folder still has files in it.)
+		if( ! $is_root_tmp_dir ) {
 			@rmdir( $dir );
 		}
 	}

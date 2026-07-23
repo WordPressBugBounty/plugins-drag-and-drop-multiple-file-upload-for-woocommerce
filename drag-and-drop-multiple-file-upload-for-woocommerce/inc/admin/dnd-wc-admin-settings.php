@@ -20,21 +20,68 @@
 			add_filter( 'woocommerce_settings_tabs_array', array( $this, 'add_settings_page' ), 20 );
 			add_action( 'woocommerce_settings_' . $this->id, array( $this, 'output' ) );
 			add_action( 'woocommerce_settings_save_' . $this->id, array( $this, 'save' ) );
-			add_action( 'woocommerce_after_settings_'. $this->id, array( $this, 'banner' ) );
+			add_action( 'admin_notices', array( $this, 'top_banner' ) );
+			add_action( 'admin_footer', array( $this, 'output_js' ) );
 
 		}
 
 		/**
-		 * Add custom banner
-		 * @return void
+		 * Show upsell dismissable notice.
 		 */
+		public function top_banner() {
+			$screen = sanitize_text_field( $_GET['tab'] ?? '' );
 
-		public function banner() {
-			echo '<div>
-					<a href="https://www.codedropz.com/woocommerce-drag-drop-multiple-file-upload/" target="_blank" style="outline:none; box-shadow:none; display: inline-block;">
-						<img style="width:250px;" src="'.plugins_url( 'assets/images/pro-features.png', dirname( dirname(__FILE__) ) ).'">
-					</a>
-				</div>';
+			// Only show to users who can manage the plugin and file upload plugin screen.
+			if ( ! current_user_can( 'manage_options' ) || ! $screen || 'dnd-wc-file-uploads' !== $screen ) {
+				return;
+			}
+
+			// Last dismissed timestamp.
+			$last_dismissed = (int) get_user_meta( get_current_user_id(), 'dnd_wc_notice_dismissed', true );
+
+			// Hide notice for one week.
+			if ( $last_dismissed && WEEK_IN_SECONDS > ( time() - $last_dismissed ) ) {
+				echo sprintf(
+					'<div class="notice dnd-wc-pro-badge" style="float: right; margin: 0; padding: 0; border:0;">
+						<a href="%s" target="_blank" class="button button-large">%s
+							<span class="dashicons dashicons-external"></span>
+						</a>
+					</div>',
+					esc_url('https://www.codedropz.com/woocommerce-drag-drop-multiple-file-upload/'),
+					esc_html__( 'Upgrade to Pro', 'dnd-file-upload-wc' )
+				);
+				return;
+			}
+			?>
+			<div class="notice notice-info is-dismissible dnd-wc-admin-notice" style="padding: 3px;">
+				<p>
+					<a style="color: green; text-decoration:none;" href="https://www.codedropz.com/woocommerce-drag-drop-multiple-file-upload/" target="_blank">🔥 Upgrade to PRO</a> - Unlock larger uploads, custom filenames, ZIP support, image previews, and more. 🔥 Get 30% OFF today!
+				</p>
+			</div>
+			<?php
+		}
+
+		/**
+		 * Add dismissal js in admin footer.
+		 */
+		public function output_js() {
+			$screen = sanitize_text_field( $_GET['tab'] ?? '' );
+			if ( ! current_user_can( 'manage_options' ) || ! $screen || 'dnd-wc-file-uploads' !== $screen ) {
+				return;
+			}
+			?>
+			<script>
+				jQuery(function ($) {
+					$(document).on('click', '.dnd-wc-admin-notice .notice-dismiss', function (e) {
+						e.preventDefault();
+						$.post( woocommerce_admin.ajax_url, {
+							action : 'dnd_wc_dismiss_notice',
+							nonce : "<?php echo wp_create_nonce( 'dnd_wc_nonce' ); ?>",
+						});
+					});
+				});
+			</script>
+			<?php
 		}
 
 		/**

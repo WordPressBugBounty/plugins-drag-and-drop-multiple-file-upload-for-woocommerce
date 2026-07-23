@@ -12,7 +12,6 @@
 	/**
 	* Begin : begin plugin initialization
 	*/
-
 	class DNDMFU_WC_MAIN {
 
 		private static $instance = null;
@@ -39,7 +38,6 @@
 		*
 		* @return  Init A single instance of this class.
 		*/
-
 		public static function get_instance() {
 			if( null == self::$instance ) {
 				self::$instance = new self;
@@ -50,7 +48,6 @@
 		/**
 		* Load and initialize plugin
 		*/
-
 		private function __construct() {
 			$this->init_actions();
 			$this->init();
@@ -69,7 +66,6 @@
 		/**
 		* Plugin init
 		*/
-
 		public function init() {
 
 			// Includes functions / helpers
@@ -121,7 +117,6 @@
 		/**
 		* Includes custom files
 		*/
-
 		public function includes() {
 			include( DNDMFU_WC_DIR .'/inc/functions/functions-dnd-upload-wc.php' );
 			include( DNDMFU_WC_DIR .'/inc/functions/functions-dnd-upload-custom.php' );
@@ -130,7 +125,6 @@
 		/**
 		* Begin : begin plugin hooks
 		*/
-
 		public function hooks() {
 
 			// List of available hooks ( Mostly Woo )
@@ -187,7 +181,6 @@
 		/**
 		* Begin : Custom filters
 		*/
-
 		public function filters() {
 
 			// Get plugin basename
@@ -207,7 +200,6 @@
 		/**
 		* Run - hooks & filters
 		*/
-
 		protected function process_hook_filters( $hooks, $filter = false ) {
 
 			if( ! $hooks ) {
@@ -230,14 +222,97 @@
 			}
 		}
 
+		/**
+		* Security helpers - token ownership & throttling
+		*/
+		private function get_token() {
+			if( empty( $_POST['token'] ) ) {
+				return '';
+			}
+			$token = sanitize_text_field( wp_unslash( $_POST['token'] ) );
+			return preg_match( '/^[A-Za-z0-9]{32}$/', $token ) ? $token : '';
+		}
+
+		// Get user IP address
+		private function get_ip() {
+			$ip = isset( $_SERVER['REMOTE_ADDR'] ) ? wp_unslash( $_SERVER['REMOTE_ADDR'] ) : '0.0.0.0';
+			return filter_var( $ip, FILTER_VALIDATE_IP ) ? $ip : '0.0.0.0';
+		}
+
+		// Check if nonce use 60 times in a span of 1minute (Per user IP address)
+		private function is_nonce_throttled( $key, $max = 60, $window = 60 ) {
+			$transient_key = 'dnd_wc_rl_' . md5( $key );
+			$hits          = (int) get_transient( $transient_key );
+
+			if( $hits >= $max ) {
+				return true;
+			}
+
+			set_transient( $transient_key, $hits + 1, $window );
+			return false;
+		}
+
+		/**
+		* Every upload session gets its own tmp subfolder, named after its token.
+		* A file only belongs to a token if it lives inside that token's folder -
+		* no per-file transient row needed, and the filename itself is never touched.
+		*/
+		private function get_token_upload_dir( $token ) {
+			return trailingslashit( $this->_options['tmp_folder'] ) . md5( $token );
+		}
+
+		/**
+		* One state row per token - upload count + throttle windows, instead of separate transients.
+		*/
+		private function get_token_state( $token ) {
+			$defaults = array(
+				'file_count'           => 0,
+				'upload_hits'          => 0,
+				'upload_window_start'  => 0,
+				'delete_hits'          => 0,
+				'delete_window_start'  => 0,
+			);
+			$state = get_transient( 'dnd_wc_s_' . md5( $token ) );
+			return is_array( $state ) ? wp_parse_args( $state, $defaults ) : $defaults;
+		}
+
+		/**
+		 * Save new transient by token with new state data.
+		 */
+		private function save_token_state( $token, $state ) {
+			set_transient( 'dnd_wc_s_' . md5( $token ), $state, DAY_IN_SECONDS );
+		}
+
+		/**
+		* Fixed-window throttle against a shared token state array.
+		*/
+		private function token_throttled( &$state, $hits_field, $window_field, $max, $window ) {
+			$now = time();
+			if( empty( $state[ $window_field ] ) || ( $now - $state[ $window_field ] ) >= $window ) {
+				$state[ $window_field ] = $now;
+				$state[ $hits_field ]   = 0;
+			}
+			if( $state[ $hits_field ] >= $max ) {
+				return true;
+			}
+			$state[ $hits_field ]++;
+			return false;
+		}
+
         /**
         * Check for nonce
         */
-
         public function check_nonce(){
-            if( ! check_ajax_referer( 'dnd_wc_ajax_upload', 'nonce', false ) ){
-                wp_send_json_success( wp_create_nonce( 'dnd_wc_ajax_upload' ) );
+
+            // Throttle so bots can't farm tokens and bloat wp_options.
+            if( $this->is_nonce_throttled( 'nonce_' . $this->get_ip(), 30, MINUTE_IN_SECONDS ) ) {
+                wp_send_json_error( 'Too many requests.', 429 );
             }
+
+            wp_send_json_success( array(
+                'nonce' =>  wp_create_nonce( 'dnd_wc_ajax_upload' ),
+                'token' =>  wp_generate_password( 32, false, false ),
+            ) );
         }
 
 		/**
@@ -279,7 +354,6 @@
         /**
 		* Temporary fix for naming conflict with option.
 		*/
-
         public function prefix_option() {
 
             $settings = array(
@@ -298,7 +372,6 @@
 		/**
 		* Begin : Load js and css
 		*/
-
 		public function enqueue() {
 
 			// Get plugin version
@@ -356,18 +429,48 @@
 		/**
 		* Begin process ajax upload.
 		*/
-
 		public function upload() {
 
             if( ! check_ajax_referer( 'dnd_wc_ajax_upload', 'security', false ) ){
                 wp_send_json_error('The security nonce is invalid or expired');
             }
 
+			// Require ownership token
+			$token = $this->get_token();
+			if( ! $token ) {
+				wp_send_json_error('Missing upload session. Please refresh the page.');
+			}
+
+			// Per-token file cap - @newJuly 2026
+			$max_files = (int) get_option('wcf_drag_n_drop_max_file_upload');
+			$max_files = $max_files > 0 ? $max_files : 10;
+			$state     = $this->get_token_state( $token ); // get_transient [file_count, upload_hits]
+
+			if( $state['file_count'] >= $max_files ) {
+				wp_send_json_error( sprintf( __('You have reached the maximum number of files ( Only %s files allowed )','dnd-file-upload-wc'), $max_files ) );
+			}
+
+			// max 60 Uploads/min per token (true if hit max)
+			$throttled = $this->token_throttled( $state, 'upload_hits', 'upload_window_start', 60, MINUTE_IN_SECONDS );
+
+			// Save token in transient - initial
+			$this->save_token_state( $token, $state );
+
+			// If throttled hits max 60 uploads/minuate return an error.
+			if( $throttled ) {
+				wp_send_json_error('Too many uploads. Please slow down.', 429 );
+			}
+
 			// input type file 'name'
 			$name = 'dnd-wc-upload-file';
 
-			// Setup $_FILE name (from Ajax)
-			$file = isset( $_FILES[$name] ) ? wc_clean( $_FILES[ $name ] ) : null;
+			// Guard missing entry; do NOT wc_clean() the whole array (it mangles tmp_name)
+			if( ! isset( $_FILES[$name] ) || ! isset( $_FILES[$name]['tmp_name'] ) ) {
+				wp_send_json_error( $this->get_error_msg('failed_upload') );
+			}
+
+			$file         = $_FILES[ $name ];
+			$file['name'] = sanitize_file_name( $file['name'] );
 
 			// Tells whether the file was uploaded via HTTP POST
 			if ( ! is_uploaded_file( $file['tmp_name'] ) ) {
@@ -395,19 +498,25 @@
 				wp_send_json_error( get_option('wcf_drag_n_drop_error_invalid_file') ? get_option('wcf_drag_n_drop_error_invalid_file') : $this->get_error_msg('invalid_type') );
 			}
 
-			// Check file type (Validation)
-			$validate = wp_check_filetype( $file['name'] );
-			if ( $validate['type'] == false || $validate['ext'] == false ) {
+			// Check file type - sniffs real content, not just the extension
+			$validate = wp_check_filetype_and_ext( $file['tmp_name'], $file['name'] );
+			if ( empty( $validate['type'] ) || empty( $validate['ext'] ) ) {
 				wp_send_json_error( get_option('wcf_drag_n_drop_error_invalid_file') ? get_option('wcf_drag_n_drop_error_invalid_file') : $this->get_error_msg('invalid_type') );
 			}
 
-			// validate file size limit
-			if( $file['size'] > (int)sanitize_text_field( $_POST['size_limit'] ) ) {
+			// Size limit - clamp client value against the server setting
+			$server_limit = (int) get_option('wcf_drag_n_drop_file_size_limit');
+			$server_limit = $server_limit > 0 ? ( $server_limit * 1048576 ) : wp_max_upload_size();
+
+			$client_limit = isset( $_POST['size_limit'] ) ? (int) $_POST['size_limit'] : $server_limit;
+			$size_limit   = min( $server_limit, $client_limit > 0 ? $client_limit : $server_limit );
+
+			if( $file['size'] > $size_limit ) {
 				wp_send_json_error( get_option('wcf_drag_n_drop_error_files_too_large') ? get_option('wcf_drag_n_drop_error_files_too_large') : $this->get_error_msg('large_file') );
 			}
 
-			// Get dir setup / path ( temporary folder )
-			$base_dir = trailingslashit( $this->_options['upload_dir'] ) . $this->_options['tmp_folder'];
+			// Get dir setup / path - each upload session gets its own tmp subfolder ( named after its token )
+			$base_dir = trailingslashit( $this->_options['upload_dir'] ) . $this->get_token_upload_dir( $token );
 
 			// Create tmp_folder dir
 			if( ! is_dir( $base_dir ) ) {
@@ -421,7 +530,7 @@
 			// Add filter on upload file name
 			$filename = apply_filters( 'dndmfu_wc_file_name', $filename, $file['name'] );
 
-			// Generate new filename
+			// Generate new filename - kept exactly as-is, ownership lives in the folder, not the filename.
 			$filename = wp_unique_filename( $base_dir, $filename );
 			$new_file = path_join( $base_dir, $filename );
 
@@ -431,8 +540,12 @@
 				wp_send_json_error( $error_upload );
 			}else{
 
+				// Bump this session's file counter (update file count in transient)
+				$state['file_count']++;
+				$this->save_token_state( $token, $state );
+
 				// Setup path and file name and add it to response.
-				$path = trailingslashit( '/' . wp_basename( $base_dir ) );
+				$path = trailingslashit( '/' . $this->get_token_upload_dir( $token ) );
 
 				// Change file permission to 0400
 				chmod( $new_file, 0644 );
@@ -450,50 +563,81 @@
 		/**
 		* Delete specific files - via Ajax
 		*/
-
 		public function delete_file() {
 
-			// Verify ajax none
+			// Layer 1 - CSRF only. Every guest shares the same nonce,
+			// so this can never prove identity.
 			if( ! check_ajax_referer( 'dnd_wc_ajax_upload', 'security', false ) ){
-                wp_send_json_error('The security nonce is invalid or expired');
-            }
+				wp_send_json_error('The security nonce is invalid or expired');
+			}
+
+			// Layer 2 - ownership token. This is what stops the PoC.
+			$token = $this->get_token();
+			if( ! $token ) {
+				wp_send_json_error('Missing upload session.', 403 );
+			}
+
+			// Layer 3 - throttle
+			$state = $this->get_token_state( $token ); // get_transient [file_count, upload_hits]
+
+			// Max 30 files deleted/min per token (true if hit max)
+			$throttled = $this->token_throttled( $state, 'delete_hits', 'delete_window_start', 30, MINUTE_IN_SECONDS );
+
+			// Save token in transient - initial
+			$this->save_token_state( $token, $state );
+
+			// If throttled hits max 30 deletes/minute return an error.
+			if( $throttled ) {
+				wp_send_json_error('Too many requests.', 429 );
+			}
 
 			// Sanitize Path
-			$get_file_name = ( isset( $_POST['path'] ) ? sanitize_text_field( trim( $_POST['path'] ) ) : null );
+			$get_file_name = ( isset( $_POST['path'] ) ? sanitize_text_field( wp_unslash( $_POST['path'] ) ) : '' );
 
 			// Get only the filename to avoid traversal attack..
-			$file_name = basename( $get_file_name );
+			$file_name = basename( trim( $get_file_name ) );
 
-			// Make sure path is set
-			if( ! is_null( $file_name ) ) {
+			if( '' === $file_name ) {
+				wp_send_json_error('Invalid file.', 400 );
+			}
 
-				// Check valid filename & extensions
-				if( preg_match_all('/wp-|(\.php|\.exe|\.js|\.phtml|\.cgi|\.aspx|\.asp|\.bat)/', $file_name ) ) {
-					die('File not safe');
-				}
+			// Check valid filename & extensions
+			if( preg_match_all('/wp-|(\.php|\.exe|\.js|\.phtml|\.cgi|\.aspx|\.asp|\.bat)/', $file_name ) ) {
+				wp_send_json_error('File not safe', 400 );
+			}
 
-				// Concat path and upload directory
-				$dir = trailingslashit( $this->_options['tmp_folder'] ) . $file_name;
-				$file_path = realpath( trailingslashit( $this->wp_upload_dir['basedir'] ) . $dir );
+			// Layer 4 - OWNERSHIP CHECK - only this token can resolve a path into its own tmp subfolder.
+			$dir = trailingslashit( $this->get_token_upload_dir( $token ) ) . $file_name;
 
-				// Check if directory inside wp_content/uploads/
-				$is_path_in_content_dir = strpos( $file_path, realpath( wp_normalize_path( $this->wp_upload_dir['basedir'] ) ) );
+			// Layer 5 - path containment (original logic)
+			$file_path = realpath( trailingslashit( $this->wp_upload_dir['basedir'] ) . $dir );
 
-				// Check if is in the correct upload_dir
-				if( ! preg_match("/". DNDMFU_WC_PATH ."/i", $file_path ) || ( 0 !== $is_path_in_content_dir ) ) {
-					die('It\'s not a valid upload directory');
-				}
+			if( ! $file_path ) {
+				wp_send_json_error('File not found.', 404 );
+			}
 
-				// Check if file exists
-				if( file_exists( $file_path ) ){
-					dndmfu_wc_delete_file( $file_path );
-					if( ! file_exists( $file_path ) ) {
-						wp_send_json_success('File Deleted!');
+			$is_path_in_content_dir = strpos( $file_path, realpath( wp_normalize_path( $this->wp_upload_dir['basedir'] ) ) );
+
+			if( ! preg_match("/". DNDMFU_WC_PATH ."/i", $file_path ) || ( 0 !== $is_path_in_content_dir ) ) {
+				wp_send_json_error('It\'s not a valid upload directory', 400 );
+			}
+
+			// Check if file exists
+			if( file_exists( $file_path ) ){
+				dndmfu_wc_delete_file( $file_path );
+				if( ! file_exists( $file_path ) ) {
+
+					// Reduce this session's file counter now that the delete succeeded. (transient)
+					if( $state['file_count'] > 0 ) {
+						$state['file_count']--;
+						$this->save_token_state( $token, $state );
 					}
+
+					wp_send_json_success('File Deleted!');
 				}
 			}
 
-			die;
+			wp_send_json_error('Could not delete file.', 500 );
 		}
 
 	}

@@ -13,11 +13,19 @@
 	/**
 	* Change icon on File Uploads - tab
 	*/
-
 	add_action( 'admin_head', 'dndmfu_wc_product_tabs_icon' );
-
 	function dndmfu_wc_product_tabs_icon() {
 		echo '<style>.dndmfu_wc_panel a:before { content: "\f317"!important; }</style>';
+	}
+
+	/**
+	 * Dismissal notice will only show once a week.
+	 */
+	add_action( 'wp_ajax_dnd_wc_dismiss_notice', 'dndmfu_wc_notice_dismissal' );
+	function dndmfu_wc_notice_dismissal() {
+		check_ajax_referer( 'dnd_wc_nonce', 'nonce' );
+		update_user_meta( get_current_user_id(), 'dnd_wc_notice_dismissed', time() );
+		wp_send_json_success('success');
 	}
 
 	// Product Tabs
